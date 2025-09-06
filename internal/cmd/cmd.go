@@ -1,7 +1,6 @@
-package devopsctlcmd
+package cmd
 
 import (
-	"devopsctl/pkg/cmd"
 	"devopsctl/pkg/cmdutil"
 	"errors"
 	"fmt"
@@ -19,7 +18,7 @@ const (
 )
 
 func Main() ExitCode {
-	rootCmd, err := cmd.NewCmdRoot()
+	rootCmd, err := NewCmdRoot()
 
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Failed to create root command.", "err", err)

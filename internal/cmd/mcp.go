@@ -9,11 +9,8 @@ func NewCmdMcp() *cobra.Command {
 		Use:     "mcp",
 		Short:   "Configure and manage MCP servers",
 		Long:    `Configure and manage MCP servers for different clients`,
-		Example: `$ devopsctl mcp list`,
+		Example: `$ devopsctl mcp manage`,
 	}
-
-	cmd.AddCommand(NewCmdList())
-	cmd.AddCommand(NewCmdInstall())
 
 	return cmd
 }

@@ -1,5 +1,7 @@
 .idea
 /bin
+/dist
+/.goreleaser.generated.yml
 
 .claude/settings.local.json
 .serena/

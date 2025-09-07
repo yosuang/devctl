@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"os"
 	"strings"
 	"text/tabwriter"
@@ -47,6 +48,8 @@ func (o *ListOptions) run() error {
 	if err != nil {
 		return fmt.Errorf("failed to get MCP client: %w", err)
 	}
+
+	slog.Debug("test")
 
 	// List servers
 	servers, err := client.ListServers()

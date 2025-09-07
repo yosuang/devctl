@@ -1,41 +1,41 @@
 package cmd
 
 import (
+	"devopsctl/internal/logging"
+	"devopsctl/pkg/cli"
 	"devopsctl/pkg/cmdutil"
 	"errors"
 	"log/slog"
-	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
 
-var verboseMode bool
+var settings = cli.New()
 
 func NewCmdRoot() (*cobra.Command, error) {
 	cmd := &cobra.Command{
-		Use:     "devopsctl",
-		Short:   "DevOps Management Command Line Interface",
-		Long:    `DevOps Management Command Line Interface`,
-		Example: `$ devopsctl mcp list`,
-		PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
-			if verboseMode {
-				configureLogger(slog.LevelDebug)
-			}
-			return nil
-		},
+		Use:          "devopsctl",
+		Short:        "DevOps Management Command Line Interface",
+		Long:         `DevOps Management Command Line Interface`,
+		Example:      `$ devopsctl mcp list`,
+		SilenceUsage: true,
 	}
 
-	cmd.PersistentFlags().Bool("help", false, "Show help for command")
-	cmd.PersistentFlags().BoolVar(&verboseMode, "verbose", false, "Show detailed output")
-	cmd.SetFlagErrorFunc(rootFlagErrorFunc)
+	settings.AddFlags(cmd.PersistentFlags())
 
-	cmd.SilenceUsage = true
-	cmd.CompletionOptions.DisableDefaultCmd = true
+	setupLogging()
+
+	cmd.SetFlagErrorFunc(rootFlagErrorFunc)
 
 	cmd.AddCommand(NewCmdMcp())
 
 	return cmd, nil
+}
+
+func setupLogging() {
+	logger := logging.NewLogger(func() bool { return settings.Debug })
+	slog.SetDefault(logger)
 }
 
 func rootFlagErrorFunc(cmd *cobra.Command, err error) error {
@@ -45,12 +45,7 @@ func rootFlagErrorFunc(cmd *cobra.Command, err error) error {
 	return cmdutil.FlagErrorWrap(err)
 }
 
-func init() {
-	configureLogger(slog.LevelWarn)
-}
-
-func configureLogger(level slog.Level) {
-	opts := &slog.HandlerOptions{Level: level}
-	logger := slog.New(slog.NewJSONHandler(os.Stderr, opts))
-	slog.SetDefault(logger)
+type CommandError struct {
+	error
+	ExitCode int
 }

@@ -105,9 +105,8 @@ func sourceFilesLaterThan(t time.Time) bool {
 		if len(path) > 1 && (path[0] == '.' || path[0] == '_') {
 			if info.IsDir() {
 				return filepath.SkipDir
-			} else {
-				return nil
 			}
+			return nil
 		}
 		if info.IsDir() {
 			if name := filepath.Base(path); name == "vendor" || name == "node_modules" {

@@ -20,4 +20,4 @@ func (fe *FlagError) Error() string {
 	return fe.err.Error()
 }
 
-var SilentError = errors.New("SilentError")
+var ErrSilent = errors.New("SilentError")

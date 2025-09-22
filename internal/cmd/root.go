@@ -38,7 +38,7 @@ func setupLogging() {
 	slog.SetDefault(logger)
 }
 
-func rootFlagErrorFunc(cmd *cobra.Command, err error) error {
+func rootFlagErrorFunc(_ *cobra.Command, err error) error {
 	if errors.Is(err, pflag.ErrHelp) {
 		return err
 	}

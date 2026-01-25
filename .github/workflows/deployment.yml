@@ -125,6 +125,8 @@ jobs:
           shopt -s failglob
           rm -rf dist
           mkdir dist
+          ls -la
+          ls windows -lla
           mv -v windows/devctl_* dist/
       - name: Attest release artifacts
         if: inputs.environment == 'production'

@@ -14,7 +14,6 @@ type Config struct {
 }
 
 type PackageConfig struct {
-	ID          string         `json:"id,omitempty"`
 	Name        string         `json:"name,omitempty"`
 	Version     string         `json:"version,omitempty"`
 	InstalledBy PackageManager `json:"installedBy,omitempty"`

@@ -22,17 +22,17 @@ type mockManager struct {
 	uninstalledCalls  []string
 }
 
-func (m *mockManager) Install(ctx context.Context, names ...string) error {
+func (m *mockManager) Install(_ context.Context, names ...string) error {
 	m.installedCalls = append(m.installedCalls, names...)
 	return m.installErr
 }
 
-func (m *mockManager) Uninstall(ctx context.Context, names ...string) error {
+func (m *mockManager) Uninstall(_ context.Context, names ...string) error {
 	m.uninstalledCalls = append(m.uninstalledCalls, names...)
 	return m.uninstallErr
 }
 
-func (m *mockManager) List(ctx context.Context) ([]pkgmgr.Package, error) {
+func (m *mockManager) List(_ context.Context) ([]pkgmgr.Package, error) {
 	return m.installedPackages, m.listErr
 }
 
@@ -283,6 +283,7 @@ func TestNewCmdImport(t *testing.T) {
 
 // Helper function to load config from file
 func loadConfigFromFile(t *testing.T, configDir string) *config.Config {
+	t.Helper()
 	configPath := filepath.Join(configDir, config.AppName+".json")
 	data, err := os.ReadFile(configPath)
 	require.NoError(t, err)

@@ -9,14 +9,14 @@ func FindPackage(packages []PackageConfig, name string) *PackageConfig {
 	return nil
 }
 
-func MergePackages(existing, new []PackageConfig) []PackageConfig {
+func MergePackages(existing, newPkgs []PackageConfig) []PackageConfig {
 	pkgMap := make(map[string]PackageConfig)
 
 	for _, pkg := range existing {
 		pkgMap[pkg.Name] = pkg
 	}
 
-	for _, pkg := range new {
+	for _, pkg := range newPkgs {
 		pkgMap[pkg.Name] = pkg
 	}
 

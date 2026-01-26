@@ -5,13 +5,13 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 )
 
-func NewSpinner(message string) *spinner.Model {
+func NewSpinner(_ string) *spinner.Model {
 	s := spinner.New()
 	s.Spinner = spinner.Dot
 	return &s
 }
 
-func NewProgress(total int) *progress.Model {
+func NewProgress(_ int) *progress.Model {
 	p := progress.New(progress.WithDefaultGradient())
 	return &p
 }

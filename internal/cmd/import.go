@@ -135,7 +135,7 @@ func processPackage(ctx context.Context, mgr pkgmgr.Manager, pkg config.PackageC
 	return nil
 }
 
-func getManager(pm config.PackageManager, execPath string) (pkgmgr.Manager, error) {
+func getManager(pm config.PackageManager, _ string) (pkgmgr.Manager, error) {
 	switch pm {
 	case config.Scoop:
 		return scoop.New(), nil

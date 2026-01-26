@@ -1,0 +1,9 @@
+{
+  "packages": [
+    {
+      "name": "duckdb",
+      "version": "1.4.3",
+      "installedBy": "scoop"
+    }
+  ]
+}

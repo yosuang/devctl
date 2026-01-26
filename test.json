@@ -2,7 +2,12 @@
   "packages": [
     {
       "name": "duckdb",
-      "version": "1.4.3",
+      "version": "1.4.4",
+      "installedBy": "scoop"
+    },
+    {
+      "name": "innounp",
+      "version": "2.67.2",
       "installedBy": "scoop"
     }
   ]

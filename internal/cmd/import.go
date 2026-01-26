@@ -5,6 +5,7 @@ import (
 	"devctl/internal/config"
 	"devctl/pkg/pkgmgr"
 	"devctl/pkg/pkgmgr/scoop"
+	"devctl/pkg/ui"
 	"devctl/pkg/version"
 	"encoding/json"
 	"fmt"
@@ -27,62 +28,72 @@ func NewCmdImport(cfg *config.Config) *cobra.Command {
 }
 
 func runImport(cfg *config.Config, filePath string) error {
-	return runImportWithManager(cfg, filePath, nil)
-}
-
-func runImportWithManager(cfg *config.Config, filePath string, testMgr pkgmgr.Manager) error {
 	importConfig, err := loadImportConfig(filePath)
 	if err != nil {
 		return err
 	}
 
-	ctx := context.Background()
-	successfulPackages := []config.PackageConfig{}
-
+	var validPackages []config.PackageConfig
 	for _, pkg := range importConfig.Packages {
 		if !isValidPackage(pkg) {
 			continue
 		}
-
 		if pkg.InstalledBy == config.Pwsh {
-			if testMgr == nil {
-				fmt.Printf("⚠ Skipping pwsh package: %s (pwsh not supported)\n", pkg.Name)
-			}
 			continue
 		}
-
 		if _, ok := cfg.PackageManagers[pkg.InstalledBy]; !ok {
 			return fmt.Errorf("package manager %s not configured", pkg.InstalledBy)
 		}
+		validPackages = append(validPackages, pkg)
+	}
 
-		mgr := testMgr
-		if mgr == nil {
-			mgrConfig := cfg.PackageManagers[pkg.InstalledBy]
-			mgr, err = getManager(pkg.InstalledBy, mgrConfig.ExecutablePath)
-			if err != nil {
-				return fmt.Errorf("failed to get manager: %w", err)
-			}
+	if len(validPackages) == 0 {
+		fmt.Println("No valid packages to import")
+		return nil
+	}
+
+	ctx := context.Background()
+	var successfulPackages []config.PackageConfig
+
+	packageInfos := make([]ui.PackageInfo, len(validPackages))
+	for i, pkg := range validPackages {
+		packageInfos[i] = ui.PackageInfo{
+			Name:    pkg.Name,
+			Version: pkg.Version,
 		}
+	}
 
-		if err := processPackage(ctx, mgr, pkg); err != nil {
-			if testMgr == nil {
-				fmt.Printf("✗ Failed to process %s: %v\n", pkg.Name, err)
-			}
+	var tracker = ui.NewProgressTracker(packageInfos)
+	tracker.Start()
+
+	for i, pkg := range validPackages {
+		tracker.StartPackage(i)
+
+		mgrConfig := cfg.PackageManagers[pkg.InstalledBy]
+		mgr, err := getManager(pkg.InstalledBy, mgrConfig.ExecutablePath)
+		if err != nil {
+			tracker.FailPackage(i, err)
 			continue
 		}
 
+		if err := processPackage(ctx, mgr, pkg); err != nil {
+			tracker.FailPackage(i, err)
+			continue
+		}
+
+		tracker.CompletePackage(i)
 		successfulPackages = append(successfulPackages, pkg)
 	}
 
+	tracker.Stop()
+
+	// TODO bellow code should be handled by ui internal
 	cfg.Packages = config.MergePackages(cfg.Packages, successfulPackages)
 
 	if err := config.SaveToFile(cfg, cfg.ConfigDir); err != nil {
 		return fmt.Errorf("failed to save configuration: %w", err)
 	}
 
-	if testMgr == nil {
-		fmt.Printf("\n✓ Successfully imported %d package(s)\n", len(successfulPackages))
-	}
 	return nil
 }
 

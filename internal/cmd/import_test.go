@@ -276,7 +276,7 @@ func TestNewCmdImport(t *testing.T) {
 
 	// #then: command should be properly configured
 	require.NotNil(t, cmd)
-	require.Equal(t, "import", cmd.Use)
+	require.Equal(t, "import <file>", cmd.Use)
 	require.NotEmpty(t, cmd.Short)
 	require.NotNil(t, cmd.RunE)
 }

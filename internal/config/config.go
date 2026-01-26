@@ -50,4 +50,15 @@ func (cfg *Config) Merge(other *Config) {
 	if other.ConfigDir != "" {
 		cfg.ConfigDir = other.ConfigDir
 	}
+	if other.PackageManagers != nil {
+		if cfg.PackageManagers == nil {
+			cfg.PackageManagers = make(map[PackageManager]PackageManagerConfig)
+		}
+		for k, v := range other.PackageManagers {
+			cfg.PackageManagers[k] = v
+		}
+	}
+	if other.Packages != nil {
+		cfg.Packages = other.Packages
+	}
 }

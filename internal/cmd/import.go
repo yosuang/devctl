@@ -4,6 +4,7 @@ import (
 	"context"
 	"devctl/internal/config"
 	"devctl/pkg/pkgmgr"
+	"devctl/pkg/pkgmgr/scoop"
 	"devctl/pkg/version"
 	"encoding/json"
 	"fmt"
@@ -135,5 +136,10 @@ func processPackage(ctx context.Context, mgr pkgmgr.Manager, pkg config.PackageC
 }
 
 func getManager(pm config.PackageManager, execPath string) (pkgmgr.Manager, error) {
-	return nil, fmt.Errorf("manager not implemented")
+	switch pm {
+	case config.Scoop:
+		return scoop.New(), nil
+	default:
+		return nil, fmt.Errorf("manager not implemented: %s", pm)
+	}
 }

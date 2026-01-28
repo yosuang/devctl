@@ -4,12 +4,6 @@ import (
 	"fmt"
 
 	"github.com/charmbracelet/huh"
-	"github.com/charmbracelet/lipgloss"
-)
-
-var (
-	titleStyle = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("12"))
-	warnStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("11"))
 )
 
 // ConfirmAutoInstall asks the user if they want to automatically install missing package managers.

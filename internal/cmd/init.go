@@ -3,10 +3,9 @@ package cmd
 import (
 	"context"
 	"devctl/internal/config"
-	"devctl/internal/guides"
+	"devctl/internal/installer"
 	"devctl/internal/ui"
 	"devctl/pkg/executil"
-	"devctl/pkg/installer"
 	"devctl/pkg/pkgmgr"
 	"devctl/pkg/platform"
 	"fmt"
@@ -220,7 +219,7 @@ func attemptAutoInstall(managerType pkgmgr.ManagerType, platformStr string) erro
 }
 
 func showManualInstallGuide(managerType pkgmgr.ManagerType, platformStr string) {
-	guide := guides.GetInstallGuide(managerType, platformStr)
+	guide := installer.GetInstallGuide(managerType, platformStr)
 	if guide == nil {
 		fmt.Printf("No installation guide available for %s\n", managerType)
 		return

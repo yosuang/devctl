@@ -1,4 +1,4 @@
-package guides
+package installer
 
 import "devctl/pkg/pkgmgr"
 

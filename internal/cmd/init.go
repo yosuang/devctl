@@ -7,7 +7,6 @@ import (
 	"devctl/internal/ui"
 	"devctl/pkg/executil"
 	"devctl/pkg/pkgmgr"
-	"devctl/pkg/platform"
 	"fmt"
 	"strings"
 	"time"
@@ -30,7 +29,7 @@ func NewCmdInit(cfg *config.Config) *cobra.Command {
 }
 
 func runInit(cfg *config.Config) error {
-	currentPlatform := platform.GetCurrent()
+	currentPlatform := pkgmgr.GetCurrent()
 	detectResult := detectPackageManagers(currentPlatform)
 	displayDetectionResults(detectResult, currentPlatform)
 
@@ -86,9 +85,9 @@ type PackageManagerInfo struct {
 	ExecutablePath string
 }
 
-func detectPackageManagers(p platform.Platform) map[pkgmgr.ManagerType]PackageManagerInfo {
+func detectPackageManagers(p pkgmgr.Platform) map[pkgmgr.ManagerType]PackageManagerInfo {
 	managers := map[pkgmgr.ManagerType]PackageManagerInfo{}
-	supportedManagers := platform.GetSupportedManagers(p)
+	supportedManagers := pkgmgr.GetSupportedManagers(p)
 
 	for _, mgr := range supportedManagers {
 		path := executil.LookPath(string(mgr))
@@ -103,7 +102,7 @@ func detectPackageManagers(p platform.Platform) map[pkgmgr.ManagerType]PackageMa
 	return managers
 }
 
-func displayDetectionResults(results map[pkgmgr.ManagerType]PackageManagerInfo, p platform.Platform) {
+func displayDetectionResults(results map[pkgmgr.ManagerType]PackageManagerInfo, p pkgmgr.Platform) {
 	fmt.Println(titleStyle.Render(fmt.Sprintf("\nPackage Manager Detection (%s)", p)))
 	fmt.Println(strings.Repeat("─", 50))
 

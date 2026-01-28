@@ -42,7 +42,7 @@ type Output interface {
 	Println(msg string)
 
 	// Printf prints a formatted message.
-	Printf(format string, args ...interface{})
+	Printf(format string, args ...any)
 
 	// NewProgressTracker creates a new progress tracker for package operations.
 	NewProgressTracker(packages []PackageInfo) *ProgressTracker
@@ -165,6 +165,9 @@ func (t *TerminalOutput) PrintManualGuide(guide ManualGuide) {
 
 // PrintPrerequisites displays prerequisite check results.
 func (t *TerminalOutput) PrintPrerequisites(prereqs []PrerequisiteResult) {
+	if len(prereqs) == 0 {
+		return
+	}
 	fmt.Fprintln(t.Out, "Prerequisites:")
 	for _, prereq := range prereqs {
 		status := t.Styles.Success.Render(IconSuccess)
@@ -186,7 +189,7 @@ func (t *TerminalOutput) Println(msg string) {
 }
 
 // Printf prints a formatted message.
-func (t *TerminalOutput) Printf(format string, args ...interface{}) {
+func (t *TerminalOutput) Printf(format string, args ...any) {
 	fmt.Fprintf(t.Out, format, args...)
 }
 

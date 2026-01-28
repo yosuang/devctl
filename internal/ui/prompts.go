@@ -8,7 +8,7 @@ import (
 
 // ConfirmAutoInstall asks the user if they want to automatically install missing package managers.
 func ConfirmAutoInstall(count int) (bool, error) {
-	var confirmed bool
+	confirmed := true
 
 	form := huh.NewForm(
 		huh.NewGroup(
@@ -28,7 +28,7 @@ func ConfirmAutoInstall(count int) (bool, error) {
 
 // ConfirmProceed asks the user to confirm before proceeding with an installation.
 func ConfirmProceed(managerName string) (bool, error) {
-	var confirmed bool
+	confirmed := true
 
 	form := huh.NewForm(
 		huh.NewGroup(
@@ -48,7 +48,7 @@ func ConfirmProceed(managerName string) (bool, error) {
 
 // ConfirmShowGuide asks if the user wants to see the manual installation guide.
 func ConfirmShowGuide() (bool, error) {
-	var confirmed bool
+	confirmed := true
 
 	form := huh.NewForm(
 		huh.NewGroup(

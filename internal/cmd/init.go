@@ -8,6 +8,7 @@ import (
 	"devctl/pkg/executil"
 	"devctl/pkg/pkgmgr"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -35,6 +36,7 @@ func runInit(cfg *config.Config) error {
 
 	uninstalled := getUninstalledManagers(detectResult)
 	if len(uninstalled) == 0 {
+		out.Println("")
 		return saveConfiguration(out, cfg, detectResult)
 	}
 
@@ -49,12 +51,12 @@ func runInit(cfg *config.Config) error {
 		for _, mgr := range uninstalled {
 			showManualInstallGuide(out, mgr.Type, string(currentPlatform))
 		}
+		out.Println("")
 		return saveConfiguration(out, cfg, detectResult)
 	}
 
-	out.Println("")
 	for _, mgr := range uninstalled {
-		if err := attemptAutoInstall(out, mgr.Type, string(currentPlatform)); err != nil {
+		if err := attemptAutoInstall(out, mgr.Type, string(currentPlatform), cfg.Debug); err != nil {
 			out.Error(fmt.Sprintf("Failed to install %s: %v", mgr.Type, err))
 			continue
 		}
@@ -69,6 +71,7 @@ func runInit(cfg *config.Config) error {
 		}
 	}
 
+	out.Println("")
 	return saveConfiguration(out, cfg, detectResult)
 }
 
@@ -139,12 +142,12 @@ func saveConfiguration(out ui.Output, cfg *config.Config, results map[pkgmgr.Man
 	}
 
 	configPath := fmt.Sprintf("%s/%s.json", cfg.ConfigDir, config.AppName)
-	out.Success(fmt.Sprintf("Configuration saved to: %s", configPath))
+	out.Println(fmt.Sprintf("Configuration saved to: %s", configPath))
 
 	return nil
 }
 
-func attemptAutoInstall(out ui.Output, managerType pkgmgr.ManagerType, platformStr string) error {
+func attemptAutoInstall(out ui.Output, managerType pkgmgr.ManagerType, platformStr string, debug bool) error {
 	inst := installer.GetInstaller(managerType)
 	if inst == nil {
 		return fmt.Errorf("no installer available for %s", managerType)
@@ -154,6 +157,12 @@ func attemptAutoInstall(out ui.Output, managerType pkgmgr.ManagerType, platformS
 	if !canAuto {
 		out.Error(fmt.Sprintf("%s: Automatic installation not available", managerType))
 
+		failedPrereqs := getFailedPrereqs(inst.GetPrerequisites())
+		if len(failedPrereqs) > 0 {
+			out.PrintPrerequisites(failedPrereqs)
+			out.Println("")
+		}
+
 		showGuide, _ := ui.ConfirmShowGuide()
 		if showGuide {
 			showManualInstallGuide(out, managerType, platformStr)
@@ -162,21 +171,21 @@ func attemptAutoInstall(out ui.Output, managerType pkgmgr.ManagerType, platformS
 	}
 
 	out.Info(fmt.Sprintf("Installing %s...", managerType))
-	out.Println(ui.Separator(50))
-
-	prereqs := inst.GetPrerequisites()
-	prereqResults := make([]ui.PrerequisiteResult, len(prereqs))
-	for i, prereq := range prereqs {
-		prereqResults[i] = ui.PrerequisiteResult{
-			Name:    prereq.Name,
-			Passed:  prereq.Passed,
-			Message: prereq.Message,
-		}
-	}
-	out.PrintPrerequisites(prereqResults)
 
 	cmd := inst.GetInstallCommand()
-	out.PrintInstallCommand(cmd)
+	slog.Debug("installer command", slog.String("manager", string(managerType)), slog.String("cmd", cmd))
+	if debug {
+		out.PrintInstallCommand(cmd)
+	}
+
+	failedPrereqs := getFailedPrereqs(inst.GetPrerequisites())
+	if len(failedPrereqs) > 0 {
+		out.Error(fmt.Sprintf("%s: prerequisites not met for automatic installation", managerType))
+		out.PrintPrerequisites(failedPrereqs)
+		out.Println("")
+		showManualInstallGuide(out, managerType, platformStr)
+		return fmt.Errorf("prerequisites not met for %s", managerType)
+	}
 
 	confirmed, err := ui.ConfirmProceed(string(managerType))
 	if err != nil || !confirmed {
@@ -205,6 +214,21 @@ func attemptAutoInstall(out ui.Output, managerType pkgmgr.ManagerType, platformS
 
 	out.Success(fmt.Sprintf("%s installed successfully!", managerType))
 	return nil
+}
+
+func getFailedPrereqs(prereqs []installer.Prerequisite) []ui.PrerequisiteResult {
+	failed := make([]ui.PrerequisiteResult, 0, len(prereqs))
+	for _, prereq := range prereqs {
+		if prereq.Passed {
+			continue
+		}
+		failed = append(failed, ui.PrerequisiteResult{
+			Name:    prereq.Name,
+			Passed:  prereq.Passed,
+			Message: prereq.Message,
+		})
+	}
+	return failed
 }
 
 func showManualInstallGuide(out ui.Output, managerType pkgmgr.ManagerType, platformStr string) {

@@ -49,13 +49,6 @@ func (s *ScoopInstaller) GetPrerequisites() []Prerequisite {
 		Message: "PowerShell is required to install Scoop",
 	})
 
-	// Check execution policy (we'll set it during installation)
-	prereqs = append(prereqs, Prerequisite{
-		Name:    "Execution Policy",
-		Passed:  true,
-		Message: "Will be set to RemoteSigned during installation",
-	})
-
 	return prereqs
 }
 
